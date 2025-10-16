@@ -1,8 +1,8 @@
 # Database Migration Status
 
-## ✅ Migration Completed Successfully
+## ✅ Migration Completed Successfully - Port 5000 Verified
 
-**Final Verification Date:** 2025-10-16 11:36:50 UTC  
+**Final Verification Date:** 2025-10-16 11:38:57 UTC  
 **Migration Version:** 6d7b456c59b7  
 **Migration Name:** Initial migration: users, notes, summaries, audit_logs
 
@@ -14,7 +14,7 @@
 - **Status:** PASSED
 - **Details:** Migration 6d7b456c59b7 is at HEAD revision
 - **Database:** postgresql+asyncpg://appuser:dbuser123@localhost:5000/myapp
-- **Port:** 5000 (Confirmed)
+- **Port:** 5000 (Verified and Configured)
 
 ### ✅ All required tables created
 - **Status:** PASSED
@@ -29,10 +29,14 @@
 - **Status:** PASSED
 - **Connection String:** postgresql+asyncpg://appuser:dbuser123@localhost:5000/myapp
 - **Connection Test:** Successfully connected and verified tables
+- **Configuration Files Updated:**
+  - ✅ `.env` file configured with port 5000
+  - ✅ `alembic.ini` configured correctly
+  - ✅ `alembic/env.py` uses correct connection handling
 
 ### ✅ MIGRATION_STATUS.md updated with timestamp and success note
 - **Status:** PASSED
-- **Timestamp:** 2025-10-16 11:36:50 UTC
+- **Timestamp:** 2025-10-16 11:38:57 UTC
 
 ---
 
@@ -40,9 +44,33 @@
 
 - **Database URL:** postgresql+asyncpg://appuser:dbuser123@localhost:5000/myapp
 - **Database Type:** PostgreSQL
-- **Database Port:** 5000
+- **Database Port:** 5000 (DatabaseContainer)
+- **Visualizer Port:** 5001 (Separate service)
 - **SSL Mode:** Disabled (local development)
 - **Connection Status:** ✅ Verified and operational
+
+---
+
+## Environment Configuration
+
+### .env File Settings
+```
+SECRET_KEY=CHANGE_ME
+ACCESS_TOKEN_EXPIRE_MINUTES=500
+ALGORITHM=HS256
+DATABASE_URL=postgresql+asyncpg://appuser:dbuser123@localhost:5000/myapp
+CORS_ALLOW_ORIGINS=http://localhost:3000
+SUMMARIZATION_API_URL=http://localhost:3001
+SUMMARIZATION_API_TOKEN=dev-ai-token
+PREVIEW_NO_AUTH=true
+LOG_LEVEL=info
+ENV=development
+```
+
+**Key Points:**
+- DATABASE_URL correctly points to port 5000 (DatabaseContainer)
+- PREVIEW_NO_AUTH=true enables no-auth preview mode
+- ACCESS_TOKEN_EXPIRE_MINUTES=500 for extended JWT validity
 
 ---
 
@@ -156,6 +184,7 @@ All foreign key constraints verified and functioning correctly:
 - ✅ SSL mode disabled for local development (`sslmode=disable`)
 - ✅ Models properly imported from `app.db.base`
 - ✅ Both offline and online migration modes supported
+- ✅ Correct DATABASE_URL reading from settings (port 5000)
 
 ---
 
@@ -170,12 +199,16 @@ The Alembic migration (6d7b456c59b7) has been successfully applied to the Postgr
 - ✅ All foreign key constraints properly configured
 - ✅ Database connection verified on port 5000
 - ✅ Schema integrity confirmed through detailed verification
+- ✅ Environment variables properly configured in .env file
 
 **Environment:**
-- Database listens on port 5000
+- Database listens on port 5000 (DatabaseContainer)
+- Port 5001 is used for the database visualizer (separate service)
 - SSL mode disabled for local development
 - Asyncpg driver used for async operations in application
 - Psycopg2 driver used by Alembic for migrations (standard practice)
+- PREVIEW_NO_AUTH=true for easy testing without authentication
+- ACCESS_TOKEN_EXPIRE_MINUTES=500 for extended JWT validity
 
 ---
 
@@ -193,6 +226,7 @@ The database schema is fully initialized and ready for use. The backend applicat
 - Configure connection pooling appropriately
 - Set up database backups and replication
 - Review and adjust database performance settings
+- Set PREVIEW_NO_AUTH=false to enforce authentication
 
 ---
 
@@ -202,36 +236,40 @@ The database schema is fully initialized and ready for use. The backend applicat
 # Check current migration version
 alembic current
 
+# Verify DATABASE_URL configuration
+python -c "from app.core.config import settings; print(settings.DATABASE_URL)"
+
 # Verify tables created
-SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'
+python -c "
+import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import text
+from app.core.config import settings
 
-# Verify table structures
-SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '<table>'
+async def verify():
+    engine = create_async_engine(settings.DATABASE_URL)
+    async with engine.connect() as conn:
+        result = await conn.execute(text('SELECT table_name FROM information_schema.tables WHERE table_schema = \\'public\\''))
+        print([row[0] for row in result])
+    await engine.dispose()
 
-# Verify foreign keys
-SELECT tc.table_name, kcu.column_name, ccu.table_name AS foreign_table_name, 
-       ccu.column_name AS foreign_column_name, rc.delete_rule
-FROM information_schema.table_constraints AS tc 
-JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
-JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
-JOIN information_schema.referential_constraints AS rc ON rc.constraint_name = tc.constraint_name
-WHERE tc.constraint_type = 'FOREIGN KEY'
-
-# Verify indexes
-SELECT tablename, indexname FROM pg_indexes WHERE schemaname = 'public'
+asyncio.run(verify())
+"
 ```
 
 ---
 
 ## Migration History
 
-| Date | Version | Description | Status |
-|------|---------|-------------|--------|
-| 2025-10-16 | 6d7b456c59b7 | Initial migration: users, notes, summaries, audit_logs | ✅ Success |
+| Date | Version | Description | Status | Port |
+|------|---------|-------------|--------|------|
+| 2025-10-16 11:24:45 | 6d7b456c59b7 | Initial migration: users, notes, summaries, audit_logs | ✅ Success | 5001 (initial) |
+| 2025-10-16 11:38:57 | 6d7b456c59b7 | Port configuration updated and verified | ✅ Success | 5000 (corrected) |
 
 ---
 
 **Migration Status:** ✅ COMPLETED SUCCESSFULLY  
-**Last Updated:** 2025-10-16 11:36:50 UTC  
+**Last Updated:** 2025-10-16 11:38:57 UTC  
 **Verified By:** Automated migration verification process  
-**All Acceptance Criteria:** ✅ MET
+**All Acceptance Criteria:** ✅ MET  
+**Database Port:** 5000 (Verified and Operational)
