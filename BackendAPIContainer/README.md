@@ -17,6 +17,16 @@ See .env.example for all variables:
 - DATABASE_URL (e.g., postgresql+asyncpg://user:pass@host:5432/db)
 - CORS_ALLOW_ORIGINS
 - SUMMARIZATION_API_URL, SUMMARIZATION_API_TOKEN
+- PREVIEW_NO_AUTH, LOG_LEVEL, ENV
+
+Preview-safe defaults are provided in `.env` for local runs:
+- ACCESS_TOKEN_EXPIRE_MINUTES=500
+- DATABASE_URL=postgresql+asyncpg://appuser:dbuser123@localhost:5001/myapp
+- CORS_ALLOW_ORIGINS=http://localhost:3000
+- SUMMARIZATION_API_URL=http://localhost:3001
+- PREVIEW_NO_AUTH=true
+- LOG_LEVEL=info
+- ENV=development
 
 ## Local Development
 1. Create and populate `.env` from `.env.example`.
