@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import get_current_user
+from app.core.security import get_preview_or_current_user
 from app.db.session import get_session
 from app.models.note import Note
 from app.models.summary import Summary
@@ -24,7 +24,7 @@ router = APIRouter()
 )
 async def list_notes(
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> List[NoteRead]:
     """
     List notes for current user.
@@ -52,7 +52,7 @@ async def list_notes(
 async def create_note(
     payload: NoteCreate,
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> NoteRead:
     """
     Create a note.
@@ -82,7 +82,7 @@ async def create_note(
 async def get_note(
     id: int,
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> NoteRead:
     """
     Get a specific note by ID for the current user.
@@ -116,7 +116,7 @@ async def update_note(
     id: int,
     payload: NoteUpdate,
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> NoteRead:
     """
     Update a note.
@@ -155,7 +155,7 @@ async def update_note(
 async def delete_note(
     id: int,
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> None:
     """
     Delete a note.
@@ -187,7 +187,7 @@ async def delete_note(
 async def get_note_summary(
     id: int,
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> SummaryRead:
     """
     Retrieve stored summary for a note.
@@ -225,7 +225,7 @@ async def get_note_summary(
 async def summarize_note(
     id: int,
     session: AsyncSession = Depends(get_session),
-    user=Depends(get_current_user),
+    user=Depends(get_preview_or_current_user),
 ) -> dict:
     """
     Trigger AI summarization for a note, persisting the summary.

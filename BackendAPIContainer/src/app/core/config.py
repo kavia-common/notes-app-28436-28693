@@ -27,6 +27,9 @@ class Settings(BaseModel):
     SUMMARIZATION_API_URL: str = Field(default="https://api.example.com/api/v1", description="External summarization API base URL")
     SUMMARIZATION_API_TOKEN: str = Field(default="summarizer-token-placeholder", description="Bearer token for summarization API")
 
+    # Preview mode
+    PREVIEW_NO_AUTH: bool = Field(default=False, description="Enable no-auth preview mode for testing (bypasses authentication)")
+
 
 @lru_cache
 def get_settings() -> Settings:
@@ -39,6 +42,7 @@ def get_settings() -> Settings:
         CORS_ALLOW_ORIGINS=[o.strip() for o in os.getenv("CORS_ALLOW_ORIGINS", "*").split(",")],
         SUMMARIZATION_API_URL=os.getenv("SUMMARIZATION_API_URL", "https://api.example.com/api/v1"),
         SUMMARIZATION_API_TOKEN=os.getenv("SUMMARIZATION_API_TOKEN", "summarizer-token-placeholder"),
+        PREVIEW_NO_AUTH=os.getenv("PREVIEW_NO_AUTH", "false").lower() in ("true", "1", "yes"),
     )
 
 
