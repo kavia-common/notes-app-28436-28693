@@ -40,12 +40,16 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(auth_router, prefix="/auth", tags=["auth"])
-    app.include_router(notes_router, prefix="/notes", tags=["notes", "summarization"])
+    app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+    app.include_router(notes_router, prefix="/api/v1/notes", tags=["notes", "summarization"])
 
-    @app.get("/", tags=["health"], summary="Health check", description="Simple health check endpoint.")
-    async def health_check():
+    @app.get("/", tags=["health"], summary="Root health check", description="Simple root health check endpoint.")
+    async def root_health_check():
         return {"message": "Healthy", "timestamp": datetime.utcnow().isoformat()}
+
+    @app.get("/api/v1/health", tags=["health"], summary="API v1 health check", description="Health check endpoint for API v1.")
+    async def health_check():
+        return {"message": "Healthy", "timestamp": datetime.utcnow().isoformat(), "version": "1.0.0"}
 
     # WebSocket usage help route (no websockets implemented yet, but added per docs requirement)
     @app.get(
