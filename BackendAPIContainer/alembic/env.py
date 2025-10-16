@@ -40,7 +40,14 @@ def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     from sqlalchemy import create_engine
 
-    connectable = create_engine(settings.DATABASE_URL.replace("+asyncpg", ""))
+    # Remove asyncpg driver and add sslmode=disable for local development
+    db_url = settings.DATABASE_URL.replace("+asyncpg", "")
+    if "?" not in db_url:
+        db_url += "?sslmode=disable"
+    else:
+        db_url += "&sslmode=disable"
+    
+    connectable = create_engine(db_url)
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
 
