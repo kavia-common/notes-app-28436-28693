@@ -45,14 +45,32 @@ The `CORS_ALLOW_ORIGINS` environment variable accepts a comma-separated list of 
 - Multiple origins: `CORS_ALLOW_ORIGINS=http://localhost:3000,http://localhost:3001,https://app.example.com`
 - Allow all (not recommended for production): `CORS_ALLOW_ORIGINS=*`
 
+## Database Setup
+The backend connects to the PostgreSQL DatabaseContainer running on port 5001. 
+
+**Connection Details:**
+- Host: localhost (or DatabaseContainer hostname in production)
+- Port: 5001
+- Database: myapp
+- User: appuser
+- Password: dbuser123
+
+The `DATABASE_URL` environment variable must be set to:
+```
+postgresql+asyncpg://appuser:dbuser123@localhost:5001/myapp
+```
+
+This is already configured in `.env.example`. The backend uses SQLAlchemy 2.0 with asyncpg driver for async database operations.
+
 ## Local Development
 1. Create and populate `.env` from `.env.example`.
-2. Install dependencies:
+2. Ensure the DatabaseContainer is running on port 5001 with the configured credentials.
+3. Install dependencies:
    pip install -r requirements.txt
-3. Run migrations (optional to start, models can be created by your own migration workflow):
+4. Run migrations (optional to start, models can be created by your own migration workflow):
    - Initialize alembic (already configured): alembic revision --autogenerate -m "init"
    - Apply: alembic upgrade head
-4. Start server:
+5. Start server:
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 OpenAPI at: /openapi.json, Swagger UI at: /docs
